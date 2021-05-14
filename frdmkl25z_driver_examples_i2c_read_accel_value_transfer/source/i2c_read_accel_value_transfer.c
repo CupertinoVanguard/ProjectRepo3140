@@ -455,7 +455,7 @@ int main(void)
         write_reg = ACCEL_XYZ_DATA_CFG;
         databyte = 0x01;
         I2C_WriteAccelReg(BOARD_ACCEL_I2C_BASEADDR, g_accel_addr_found, write_reg, databyte);
-
+        PRINTF("SOMETHING MAJOR TO SEE IF COMMIT WORKED")l
         /*  write 0000 1101 = 0x0D to accelerometer control register 1 */
         /*  [7-6]: aslp_rate=00 */
         /*  [5-3]: dr=001 for 200Hz data rate (when in hybrid mode) */
