@@ -365,6 +365,7 @@ static bool I2C_ReadAccelRegs(I2C_Type *base, uint8_t device_addr, uint8_t reg_a
     }
 }
 int arbitraryMethod(){
+	//not used
 	return 0;
 }
 
