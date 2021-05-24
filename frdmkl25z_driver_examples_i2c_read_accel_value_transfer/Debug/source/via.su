@@ -1,0 +1,12 @@
+fsl_clock.h:584:20:CLOCK_EnableClock	24	static
+fsl_clock.h:614:20:CLOCK_SetTpmClock	16	static
+fsl_gpio.h:157:20:GPIO_WritePinOutput	24	static
+fsl_tpm.h:579:20:TPM_StartTimer	24	static
+fsl_port.h:256:20:PORT_SetPinConfig	32	static
+via.c:76:13:i2c_release_bus_delay	16	static
+via.c:85:6:BOARD_I2C_ReleaseBus	16	static
+via.c:136:13:i2c_master_callback	24	static
+via.c:150:13:I2C_ReadAccelWhoAmI	72	static
+via.c:267:13:I2C_WriteAccelReg	48	static
+via.c:303:13:I2C_ReadAccelRegs	64	static
+via.c:342:5:main	88	static

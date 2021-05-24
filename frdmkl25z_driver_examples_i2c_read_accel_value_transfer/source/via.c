@@ -1,33 +1,3 @@
-/*
- * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2017 NXP
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *
- * o Redistributions of source code must retain the above copyright notice, this list
- *   of conditions and the following disclaimer.
- *
- * o Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- *
- * o Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from this
- *   software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 /*  SDK Included Files */
 #include "board.h"
 #include "fsl_debug_console.h"
@@ -364,16 +334,14 @@ static bool I2C_ReadAccelRegs(I2C_Type *base, uint8_t device_addr, uint8_t reg_a
         return false;
     }
 }
-int arbitraryMethod(){
-	//not used
-	return 0;
-}
-
 /*!
  * @brief Main function
+ * This function reads the accelerator values (after initializing the I2C communication) and updating the LED
+ * duty cycles based on those values.
  */
 int main(void)
 {
+	//LED Initializes
     bool isThereAccel = false;
     BOARD_InitPins();
     BOARD_BootClockRUN();
@@ -384,6 +352,7 @@ int main(void)
 
 
     /********************************************************/
+    //TPM parameter declarations
     tpm_config_t tpmInfo;
     tpm_config_t tpmInfo2;
     tpm_chnl_pwm_signal_param_t tpmParam1;
@@ -483,13 +452,16 @@ int main(void)
             I2C_ReadAccelRegs(BOARD_ACCEL_I2C_BASEADDR, g_accel_addr_found, ACCEL_STATUS, readBuff, 7);
 
             status0_value = readBuff[0];
+            //formats x, y, z to be a 16 bit integer with a shifted 8 bit OR'd with an 8 bit
             x = ((int16_t)(((readBuff[1] * 256U) | readBuff[2]))) / 4U;
             y = ((int16_t)(((readBuff[3] * 256U) | readBuff[4]))) / 4U;
             z = ((int16_t)(((readBuff[5] * 256U) | readBuff[6]))) / 4U;
 
-            //PRINTF("status_reg = 0x%x , x = %5d , y = %5d , z = %5d \r\n", status0_value, x, y, z);
 
             PRINTF("%5d\n",x);
+            /*
+             * discrete normalization of x,y,z to fit iin the desired PWM range.
+             */
             if (x > 1000) x = 1000;
             else if (x < -1000) x = -1000;
             x += 1000;
@@ -509,7 +481,7 @@ int main(void)
             TPM_UpdateChnlEdgeLevelSelect(BOARD_TPM_BASEADDR2, (tpm_chnl_t)BOARD_TPM_CHANNEL1, 0U);
 
 
-                    /* Update PWM duty cycle */
+             /* Update PWM duty cycle */
             TPM_UpdatePwmDutycycle(BOARD_TPM_BASEADDR, (tpm_chnl_t)BOARD_TPM_CHANNEL1, kTPM_CenterAlignedPwm,x);
             TPM_UpdatePwmDutycycle(BOARD_TPM_BASEADDR, (tpm_chnl_t)BOARD_TPM_CHANNEL0, kTPM_CenterAlignedPwm,y);
             TPM_UpdatePwmDutycycle(BOARD_TPM_BASEADDR2, (tpm_chnl_t)BOARD_TPM_CHANNEL1, kTPM_CenterAlignedPwm,z);
@@ -520,10 +492,6 @@ int main(void)
             TPM_UpdateChnlEdgeLevelSelect(BOARD_TPM_BASEADDR, (tpm_chnl_t)BOARD_TPM_CHANNEL1, pwmLevel);
             TPM_UpdateChnlEdgeLevelSelect(BOARD_TPM_BASEADDR, (tpm_chnl_t)BOARD_TPM_CHANNEL0, pwmLevel);
             TPM_UpdateChnlEdgeLevelSelect(BOARD_TPM_BASEADDR2, (tpm_chnl_t)BOARD_TPM_CHANNEL1, pwmLevel);
-            //for(int j = 0; j<100000;j++);
-
-
-            //values between -8192 and +8191
         }
     }
 
